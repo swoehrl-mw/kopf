@@ -29,6 +29,7 @@ from kopf._cogs.aiokits import aiotasks, aiotoggles
 from kopf._cogs.clients import api, errors, fetching
 from kopf._cogs.configs import configuration
 from kopf._cogs.structs import bodies, references
+from kopf._cogs.structs.credentials import LoginError
 
 logger = logging.getLogger(__name__)
 
@@ -275,5 +276,5 @@ async def watch_objs(
         ):
             yield raw_input
 
-    except (aiohttp.ClientConnectionError, aiohttp.ClientPayloadError, asyncio.TimeoutError):
+    except (aiohttp.ClientConnectionError, aiohttp.ClientPayloadError, asyncio.TimeoutError, LoginError):
         pass
