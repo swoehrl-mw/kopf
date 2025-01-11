@@ -263,18 +263,21 @@ async def watch_objs(
 
     # Stream the parsed events from the response until it is closed server-side,
     # or until it is closed client-side by the pause-waiting future's callbacks.
-    try:
-        async for raw_input in api.stream(
-            url=resource.get_url(namespace=namespace, params=params),
-            logger=logger,
-            settings=settings,
-            stopper=operator_pause_waiter,
-            timeout=aiohttp.ClientTimeout(
-                total=settings.watching.client_timeout,
-                sock_connect=connect_timeout,
-            ),
-        ):
-            yield raw_input
+    while True:
+        try:
+            async for raw_input in api.stream(
+                url=resource.get_url(namespace=namespace, params=params),
+                logger=logger,
+                settings=settings,
+                stopper=operator_pause_waiter,
+                timeout=aiohttp.ClientTimeout(
+                    total=settings.watching.client_timeout,
+                    sock_connect=connect_timeout,
+                ),
+            ):
+                yield raw_input
 
-    except (aiohttp.ClientConnectionError, aiohttp.ClientPayloadError, asyncio.TimeoutError, LoginError):
-        pass
+        except (aiohttp.ClientConnectionError, aiohttp.ClientPayloadError, asyncio.TimeoutError):
+            return
+        except LoginError:
+            pass
